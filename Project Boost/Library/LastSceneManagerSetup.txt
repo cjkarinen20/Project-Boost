@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/ProjectBoost.unity
+- path: Assets/Scenes/ProjectBoost.unity
   isLoaded: 1
   isActive: 1
