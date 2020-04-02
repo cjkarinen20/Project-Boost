@@ -20,18 +20,18 @@ public class Rocket : MonoBehaviour
 
     private void ProcessInput()
     {
-        if (Input.GetKeyDown("up") || Input.GetKeyDown("space"))
-            while (!Input.GetKeyUp("up") || !Input.GetKeyUp("space"))
-            {
-                rigidBody.AddRelativeForce(Vector3.up);
-            }
-                
+        if (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.UpArrow))
+            rigidBody.AddRelativeForce(Vector3.up);
+
+        if (Input.GetKey(KeyCode.LeftArrow))
+            transform.Rotate(Vector3.forward);
+
+        if (Input.GetKey(KeyCode.RightArrow))
+            transform.Rotate(-Vector3.forward);
 
         else if (Input.GetKeyDown("down"))
             print("Down");
-        else if (Input.GetKeyDown("left"))
-            print("Left");
-        else if (Input.GetKeyDown("right"))
-            print("Right");
+    
+       
     }
 }
