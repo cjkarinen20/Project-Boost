@@ -34,7 +34,7 @@ public class Rocket : MonoBehaviour
 
         if (Input.GetKey(KeyCode.LeftArrow))
         {
-            float rotationSpeed = 
+            float rotationSpeed = rcsThrust * Time.deltaTime;
             transform.Rotate(Vector3.forward);
         }
 
