@@ -5,21 +5,59 @@ using UnityEngine;
 
 public class Rocket : MonoBehaviour
 {
+    [SerializeField] float turnSpeed = 100f;
+    [SerializeField] float thrustForce = 100f;
+
     Rigidbody rigidBody;
     AudioSource audioSource;
-	// Use this for initialization
+
+    int life = 3;
+
+	
+
 	void Start ()
     {
         rigidBody = GetComponent<Rigidbody>();
         audioSource = GetComponent<AudioSource>();
+
+        
 	}
 	
-	// Update is called once per frame
+	
+
 	void Update ()
     {
+       
         ProcessInput();
+        print(life);
 	}
+    private void OnCollisionEnter(Collision collision)
+    {
+        switch (collision.gameObject.tag)
+        {
+            case "Friendly":
+                print("Safe");
+                break;
 
+            case "Fuel":
+                print("Fuel");
+                if (life < 3)
+                {
+                    life++;
+                }
+                break;
+
+            default:
+                life--;
+                if (life <= 0)
+                {
+                    Destroy(gameObject);
+                }
+                break;
+
+
+        }
+    }
     private void ProcessInput()
     {
         thrust();
@@ -32,15 +70,17 @@ public class Rocket : MonoBehaviour
 
         rigidBody.freezeRotation = true;
 
+
+        float rotationSpeed = turnSpeed * Time.deltaTime;
         if (Input.GetKey(KeyCode.LeftArrow))
         {
-            float rotationSpeed = rcsThrust * Time.deltaTime;
-            transform.Rotate(Vector3.forward);
+            
+            transform.Rotate(Vector3.forward * rotationSpeed);
         }
 
-        if (Input.GetKey(KeyCode.RightArrow))
+        else if (Input.GetKey(KeyCode.RightArrow))
         {
-            transform.Rotate(-Vector3.forward);
+            transform.Rotate(-Vector3.forward * rotationSpeed);
         }
 
         rigidBody.freezeRotation = false;
@@ -50,7 +90,7 @@ public class Rocket : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.UpArrow))
         {
-            rigidBody.AddRelativeForce(Vector3.up);
+            rigidBody.AddRelativeForce(Vector3.up * thrustForce);
             if (!audioSource.isPlaying)
                 audioSource.Play();
         }
