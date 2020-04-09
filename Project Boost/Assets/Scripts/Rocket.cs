@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Rocket : MonoBehaviour
 {
@@ -11,8 +12,10 @@ public class Rocket : MonoBehaviour
     Rigidbody rigidBody;
     AudioSource audioSource;
 
-    int life = 3;
+    double fuelGauge;
 
+    enum State { Alive, Dying, Transcending}
+    State state = State.Alive;
 	
 
 	void Start ()
@@ -20,6 +23,7 @@ public class Rocket : MonoBehaviour
         rigidBody = GetComponent<Rigidbody>();
         audioSource = GetComponent<AudioSource>();
 
+        fuelGauge = 100.0;
         
 	}
 	
@@ -29,10 +33,14 @@ public class Rocket : MonoBehaviour
     {
        
         ProcessInput();
-        print(life);
+
+        print(fuelGauge);
 	}
     private void OnCollisionEnter(Collision collision)
     {
+        if (state != State.Alive)
+            return;
+
         switch (collision.gameObject.tag)
         {
             case "Friendly":
@@ -40,36 +48,55 @@ public class Rocket : MonoBehaviour
                 break;
 
             case "Fuel":
-                print("Fuel");
-                if (life < 3)
+                if (fuelGauge < 100)
                 {
-                    life++;
+                    for (int i = 0; i < fuelGauge; i++)
+                        fuelGauge++;
                 }
+                break;
+
+
+            case "Finish":
+                state = State.Transcending;
+
+                if (audioSource.isPlaying)
+                    audioSource.Stop();
+
+                Invoke("LoadNext", 1f);
                 break;
 
             default:
-                life--;
-                if (life <= 0)
-                {
-                    Destroy(gameObject);
-                }
+                state = State.Dying;
+
+                if (audioSource.isPlaying)
+                    audioSource.Stop();
+
+                Invoke("ReloadCurrent", 1f);
                 break;
-
-
         }
     }
-    private void ProcessInput()
-    {
-        thrust();
-        rotation();
 
+    private void ReloadCurrent()
+    {
+        SceneManager.LoadScene("Level2");
+    }
+
+    private void LoadNext()
+    {
+        SceneManager.LoadScene("Level1");
+    }
+
+    private void ProcessInput()
+    {   if (state == State.Alive)
+        {
+            thrust();
+            rotation();
+        }
     }
 
     private void rotation()
     {
-
         rigidBody.freezeRotation = true;
-
 
         float rotationSpeed = turnSpeed * Time.deltaTime;
         if (Input.GetKey(KeyCode.LeftArrow))
@@ -82,7 +109,6 @@ public class Rocket : MonoBehaviour
         {
             transform.Rotate(-Vector3.forward * rotationSpeed);
         }
-
         rigidBody.freezeRotation = false;
     }
 
@@ -90,9 +116,15 @@ public class Rocket : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.UpArrow))
         {
-            rigidBody.AddRelativeForce(Vector3.up * thrustForce);
-            if (!audioSource.isPlaying)
-                audioSource.Play();
+            if (fuelGauge > 0)
+            {
+                rigidBody.AddRelativeForce(Vector3.up * thrustForce);
+
+                if (!audioSource.isPlaying)
+                    audioSource.Play();
+
+                fuelGauge--;
+            }
         }
         else
         {
