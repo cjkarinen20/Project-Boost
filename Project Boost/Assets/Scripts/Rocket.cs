@@ -8,6 +8,8 @@ public class Rocket : MonoBehaviour
 {
     [SerializeField] float turnSpeed = 100f;
     [SerializeField] float thrustForce = 100f;
+    [SerializeField] float levelLoadDelay;
+
     [SerializeField] AudioClip[] audioClips;
     [SerializeField] ParticleSystem thrustEngine;
     [SerializeField] ParticleSystem death;
@@ -69,7 +71,7 @@ public class Rocket : MonoBehaviour
 
         audioSource.PlayOneShot(audioClips[1]);
         death.Play();
-        Invoke("ReloadCurrent", 1f);
+        Invoke("ReloadCurrent", levelLoadDelay);
     }
 
     private void levelChangeState()
@@ -78,7 +80,7 @@ public class Rocket : MonoBehaviour
 
         audioSource.PlayOneShot(audioClips[2]);
         win.Play();
-        Invoke("LoadNext", 1f);
+        Invoke("LoadNext", levelLoadDelay);
     }
 
     private void ReloadCurrent()
