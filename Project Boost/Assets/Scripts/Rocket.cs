@@ -8,6 +8,11 @@ public class Rocket : MonoBehaviour
 {
     [SerializeField] float turnSpeed = 100f;
     [SerializeField] float thrustForce = 100f;
+    [SerializeField] AudioClip[] audioClips;
+    [SerializeField] ParticleSystem thrustEngine;
+    [SerializeField] ParticleSystem death;
+    [SerializeField] ParticleSystem win;
+
 
     Rigidbody rigidBody;
     AudioSource audioSource;
@@ -43,42 +48,42 @@ public class Rocket : MonoBehaviour
 
         switch (collision.gameObject.tag)
         {
-            case "Friendly":
-                print("Safe");
-                break;
-
             case "Fuel":
-                if (fuelGauge < 100)
-                {
-                    for (int i = 0; i < fuelGauge; i++)
-                        fuelGauge++;
-                }
+               
                 break;
 
 
             case "Finish":
-                state = State.Transcending;
-
-                if (audioSource.isPlaying)
-                    audioSource.Stop();
-
-                Invoke("LoadNext", 1f);
+                levelChangeState();
                 break;
 
             default:
-                state = State.Dying;
-
-                if (audioSource.isPlaying)
-                    audioSource.Stop();
-
-                Invoke("ReloadCurrent", 1f);
+                deathState();
                 break;
         }
     }
 
+    private void deathState()
+    {
+        state = State.Dying;
+
+        audioSource.PlayOneShot(audioClips[1]);
+        death.Play();
+        Invoke("ReloadCurrent", 1f);
+    }
+
+    private void levelChangeState()
+    {
+        state = State.Transcending;
+
+        audioSource.PlayOneShot(audioClips[2]);
+        win.Play();
+        Invoke("LoadNext", 1f);
+    }
+
     private void ReloadCurrent()
     {
-        SceneManager.LoadScene("Level2");
+        SceneManager.LoadScene("Level2"); 
     }
 
     private void LoadNext()
@@ -101,7 +106,6 @@ public class Rocket : MonoBehaviour
         float rotationSpeed = turnSpeed * Time.deltaTime;
         if (Input.GetKey(KeyCode.LeftArrow))
         {
-            
             transform.Rotate(Vector3.forward * rotationSpeed);
         }
 
@@ -116,19 +120,20 @@ public class Rocket : MonoBehaviour
     {
         if (Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.UpArrow))
         {
-            if (fuelGauge > 0)
-            {
+
+            /*if (fuelGauge > 0)
+            {}*/
                 rigidBody.AddRelativeForce(Vector3.up * thrustForce);
 
                 if (!audioSource.isPlaying)
-                    audioSource.Play();
+                    audioSource.PlayOneShot(audioClips[0]);
 
-                fuelGauge--;
-            }
+            thrustEngine.Play();
         }
         else
         {
             audioSource.Stop();
+            thrustEngine.Stop();
         }
     }
 }
